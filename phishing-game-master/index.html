@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+    <head>
+        <meta http-equiv="x-ua-compatible" content="IE=11">
+        <style>
+            
+        .html, body{
+            background: #1f1a25;
+            background-size:cover;
+			font-family: Verdana;
+            overflow:auto;
+        }
+        #game_container {
+            width: auto;
+            position:relative;
+        }
+
+        #game_panel {
+            width: auto;
+            height: 90px;
+            margin: auto auto 20px auto;
+            text-align:center;
+            position:relative;
+
+        }
+        #dyn_content {
+            margin: auto;
+            height: auto;
+            width:auto;
+			max-width: 600px;
+			padding: 20px;
+            background-color: white;
+        
+        }
+
+        #email_content {
+			padding: 20px;
+            background-color: rgb(255, 255, 255);
+            margin: 20px 0px;
+            border: rgba(31, 31, 31, 0.253);
+            border-style: dotted;
+        }
+
+        .tt-container {
+            padding: 40px;
+            font-size: 20px;
+            font-family: sans-serif;
+        }
+        .tt-hover {
+            position: relative;
+            color: #0451ce;
+            cursor: pointer;
+        }
+        .tt-hover:before {
+            content: attr(aria-label);
+            opacity: 0;
+            position: absolute;
+            top: 30px;
+            right: -200px;
+            font-size: 13px;
+            max-width: 500px;
+            padding: 10px;
+            color: #9c27b0;
+            background-color: #fff;
+            border-radius: 3px;
+            pointer-events: none;
+            box-shadow: 0 0 13px -2px #000;
+            transition: 500ms ease-out;
+        }
+        .tt-hover:hover:before {
+            opacity: 1;
+        }
+        
+        .draw-border {
+            box-shadow: inset 0 0 0 4px #ffffff;
+            color: #ffffff;
+            transition: color 0.25s 0.08333s;
+            position: relative;
+        }
+
+        .draw-border::before, .draw-border::after {
+            border: 0 solid transparent;
+            box-sizing: border-box;
+            content: '';
+            pointer-events: none;
+            position: absolute;
+            width: 0;
+            height: 0;
+            bottom: 0;
+            right: 0;
+        }
+        .draw-border::before {
+            border-bottom-width: 4px;
+            border-left-width: 4px;
+        }
+        .draw-border::after {
+            border-top-width: 4px;
+            border-right-width: 4px;
+        }
+
+        #phish.draw-border:hover {
+            color: #ff2f2f;
+        }
+
+        #phish.draw-border:hover::before, #phish.draw-border:hover::after {
+            border-color: #ff2f2f;
+            transition: border-color 0s, width 0.25s, height 0.25s;
+            width: 100%;
+            height: 100%;
+        }
+
+        #phish.draw-border:hover::before {
+            transition-delay: 0s, 0s, 0.25s;
+        }
+
+        #phish.draw-border:hover::after {
+            transition-delay: 0s, 0.25s, 0s;
+        }
+
+        #legit.draw-border:hover {
+            color: #36e401;
+        }
+
+        #legit.draw-border:hover::before, #legit.draw-border:hover::after {
+            border-color: #36e401;
+            transition: border-color 0s, width 0.25s, height 0.25s;
+            width: 100%;
+            height: 100%;
+        }
+    
+        #legit.draw-border:hover::before {
+            transition-delay: 0s, 0s, 0.25s;
+        }
+        #legit.draw-border:hover::after {
+            transition-delay: 0s, 0.25s, 0s;
+        }
+        
+        .answer_button {
+            display: inline-block;
+            background: #2d2833;
+            border: none;
+            cursor: pointer;
+            font: 700 1.2rem 'Roboto Slab', sans-serif;
+            padding: 1em 4em;
+            margin: 1em 1em;
+            letter-spacing: 0.05rem;
+            outline: 0;
+        }
+        .answer_button:focus {
+            outline: 2px dotted #55d7dc;
+            outline: 0;
+        }
+        
+        #details {
+            font-size: 13;
+            color: #575757;
+            letter-spacing: -0.03em;
+        }
+
+        .value {
+            position: inline-block;
+            text-align: center;
+            font-weight: bold;
+            font-size: 40px;
+            color: white;
+            width: 100px; 
+            height: 75px;
+            margin: 0px auto;
+            letter-spacing: -.07em;
+        }
+            input[type="range"] {
+            display: block;
+            -webkit-appearance: none;
+            background-color: #bdc3c7;
+            width: 300px;
+            height: 5px;
+            border-radius: 5px;
+            margin: 0 auto;
+            outline: 0;
+        }
+            input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            background-color: #e74c3c;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid white;
+            cursor: pointer;
+            transition: .3s ease-in-out;
+        }​
+
+        input[type="range"]::-ms-thumb {
+            appearance: none;
+            background-color: #e74c3c;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid white;
+            cursor: pointer;
+            transition: .3s ease-in-out;
+        }​
+
+            input[type="range"]::-webkit-slider-thumb:hover {
+                background-color: white;
+                border: 2px solid #e74c3c;
+        }
+            input[type="range"]::-webkit-slider-thumb:active {
+                transform: scale(1.6);
+        }
+
+        </style>
+
+    </head>
+    <body>
+            <div id="game_container">
+                <div id="game_panel">
+                        <button id="legit" class="answer_button draw-border">Legit</button>
+                        <button id="phish" class="answer_button draw-border">Phish</button>
+                </div>
+                <div class="value">100</div>
+                    <input type="range" onmin="1" max="100" step="1" value="100">
+                <br><br><br>
+
+                <div id="dyn_content">
+                    <span id="details"></span>
+                    <div id="email_content"></div>
+                </div>
+            </div>
+
+    <script>
+        var originalDOM = new DOMParser().parseFromString(document.documentElement.outerHTML, "text/html");
+        var company, companylist, useralias, myName, myEmail, myEmailLocal, head, content, difficulty, real, mCount, dCount, mLimit, dLimit;
+        companylist = ["Spotify", "Now Music", "uTorrent", "A Facebook friend", "Messenger", "Facebook", "Clash of Clans", "WhatsApp", "Instagram", "Twitter", "Snapchat", "Candy Crush", "Steam", "Uber", "Uber Eats", "Barclays Bank", "Monzo Bank", "Norton", "Youtube", "Youtube Gaming", "Netflix", "Rabbit", "Amazon", "Play Store", "Tinder"];
+        company = companylist[GNB(0, companylist.length-1)];
+        //SETTING COMPANY TO STATIC FOR DEMO REASONS - WILL CHANGE IN GAME
+        var gameDifficulty = 10;
+
+
+        var emailTemplates = new Array();
+        emailTemplates[0] ="<html lang=\"en\"> <head> <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> <style type=\"text/css\" nonce=\"\"> body,td,div,p,a,input {font-family: arial, sans-serif;} </style> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> <meta name=\"ph_sender\" content=\"Google\"> <meta name=\"ph_url\" content=\"https://accounts.google.com/security/manage_logins%k=autoselect%5%view_device\"> <meta name=\"ph_address\" content=\"noreply@security.google.com\"> <style type=\"text/css\" nonce=\"\"> body, td {font-size:13px} a:link, a:active {color:#1155CC; text-decoration:none} a:hover {text-decoration:underline; cursor: pointer} a:visited{color:##6611CC} img{border:0px} pre { white-space: pre; white-space: -moz-pre-wrap; white-space: -o-pre-wrap; white-space: pre-wrap; word-wrap: break-word; max-width: 800px; overflow: auto;} .logo { left: -7px; position: relative; } </style> </head> <body> <div class=\"maincontent\"> <tr> <td colspan=\"2\"> <table width=\"100%\" cellpadding=\"12\" cellspacing=\"0\" border=\"0\"> <tbody> <tr> <td> <div style=\"overflow: hidden;\"> <font size=\"-1\"> <u></u> <div style=\"margin:0;padding:0\" bgcolor=\"#FFFFFF\"> <img src=\"./images/unnamed.gif\" width=\"1\" height=\"1\"> <table width=\"100%\" height=\"100%\" style=\"min-width:348px\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" lang=\"en\"> <tbody> <tr height=\"32\" style=\"height:32px\"> <td></td> </tr> <tr align=\"center\"> <td> <div> <div></div> </div> <table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" style=\"padding-bottom:20px;max-width:516px;min-width:220px\"> <tbody> <tr> <td width=\"8\" style=\"width:8px\"></td> <td> <div style=\"border-style:solid;border-width:thin;border-color:#dadce0;border-radius:8px;padding:40px 20px 36px 20px\" align=\"center\" class=\"m_3472483465569000274mdv2rw\"> <img width=\"75\" height=\"24\" src=\"./images/unnamed.png\" style=\"width:75px;height:24px;margin-bottom:16px\"> <div style=\"font-family:&#39;Google Sans&#39;,Roboto,RobotoDraft,Helvetica,Arial,sans-serif;border-bottom:thin solid #dadce0;color:rgba(0,0,0,0.87);line-height:32px;padding-bottom:24px;text-align:center;word-break:break-word\"> <div style=\"font-size:24px\"><span class=\"ph_content\">New device signed in</span>&nbsp;to</div> <table align=\"center\" style=\"margin-top:8px\"> <tbody> <tr style=\"line-height:normal\"> <td align=\"right\" style=\"padding-right:8px\"><img width=\"20\" height=\"20\" style=\"width:20px;height:20px;vertical-align:sub;border-radius:50%\" src=\"./images/photo.jpg\"></td> <td><a style=\"font-family:&#39;Google Sans&#39;,Roboto,RobotoDraft,Helvetica,Arial,sans-serif;color:rgba(0,0,0,0.87);font-size:14px;line-height:20px\"><span id=\"ph_email\">myemail@gmail.com</span></a></td> </tr> </tbody> </table> </div> <div style=\"font-family:Roboto-Regular,Helvetica,Arial,sans-serif;font-size:14px;color:rgba(0,0,0,0.87);line-height:20px;padding-top:20px;text-align:center\"> <span class=\"ph_content\">Your Google Account was just signed in to from a new Windows device. You're getting this email to make sure it was you.</span> <div style=\"padding-top:32px;text-align:center\"><a href=\"#\" style=\"font-family:&#39;Google Sans&#39;,Roboto,RobotoDraft,Helvetica,Arial,sans-serif;line-height:16px;color:#ffffff;font-weight:400;text-decoration:none;font-size:14px;display:inline-block;padding:10px 24px;background-color:#4184f3;border-radius:5px;min-width:90px\" target=\"_blank\" data-saferedirecturl=\"#\"><span id=\"ph_hyperlink\">Check activity</span></a></div> <br> <div style=\"font-size:12px;line-height:16px;color:rgba(0,0,0,0.54);letter-spacing:0.3px\"><span class=\"ph_content\"></span>You can also go directly to <a style=\"color:rgba(0,0,0,0.87)\">myaccount.google.com/alert</a></div> </div> </div> <div style=\"text-align:left\"> <div style=\"font-family:Roboto-Regular,Helvetica,Arial,sans-serif;color:rgba(0,0,0,0.54);font-size:11px;line-height:18px;padding-top:12px;text-align:center\"> <div>You received this email to let you know about important changes to your Google Account and services.</div> <div style=\"direction:ltr\">© 2019 Google LLC, <a class=\"m_3472483465569000274afal\" style=\"font-family:Roboto-Regular,Helvetica,Arial,sans-serif;color:rgba(0,0,0,0.54);font-size:11px;line-height:18px;padding-top:12px;text-align:center\">1600 Amphitheatre Parkway, Mountain View, CA 94043, USA</a></div> </div> </div> </td> <td width=\"8\" style=\"width:8px\"></td> </tr> </tbody> </table> </td> </tr> <tr height=\"32\" style=\"height:32px\"> <td></td> </tr> </tbody> </table> </div> </font> </div> </td> </tr> </tbody> </table> </td> </tr> </tbody> </table> </div> </div> </body></html>";
+        emailTemplates[1] = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"https://www.w3.org/TR/html4/strict.dtd\"><!-- saved from url=(0014)about:internet --><html lang=\"en\"><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><style type=\"text/css\" nonce=\"\">body,td,div,p,a,input {font-family: arial, sans-serif;}</style><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><title>Gmail - Why our monthly prices are changing</title><style type=\"text/css\" nonce=\"\">body, td {font-size:13px} a:link, a:active {color:#1155CC; text-decoration:none} a:hover {text-decoration:underline; cursor: pointer} a:visited{color:##6611CC} img{border:0px} pre { white-space: pre; white-space: -moz-pre-wrap; white-space: -o-pre-wrap; white-space: pre-wrap; word-wrap: break-word; max-width: 800px; overflow: auto;} .logo { left: -7px; position: relative; }</style><meta name=\"ph_sender\" content=\"Netflix\"><meta name=\"ph_address\" content=\"info@mailer.netflix.com\"><meta name=\"ph_url\" content=\"https://netflix.com/manage_account\"></head><body><div bgcolor=\"#EAEAEA\" style=\"font-family:Helvetica,Arial,sans;color:rgb(34,31,31);padding:0;margin:0;background-color:rgb(234,234,234);background-color:rgb(234,234,234);margin-top:0\"><div class=\"m_-7007847074773734180hide\" style=\"display:none;width:0;height:0;max-height:0;line-height:0;overflow:hidden\"></div><table class=\"m_-7007847074773734180container\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" id=\"m_-7007847074773734180container\" style=\"background-color:rgb(234,234,234);margin-top:0\"><tbody><tr><td align=\"center\"><table class=\"m_-7007847074773734180shell\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"><tbody><tr><td class=\"m_-7007847074773734180content-shell\" bgcolor=\"#ffffff\" style=\"background:url(https://ci4.googleusercontent.com/proxy/oNeqW-3r553JHrpZ3ssylfSrnZeXfnExWk0EV_VfxRfIyPb3TqZDVejxj8PUsWzyHfbQaEUj6zyJHesFWPR02NtBsBkRg_xwtQ=s0-d-e1-ft#http://cdn.nflximg.com/us/email/hitch/netflix-crop.png) no-repeat rgb(255,255,255);background-repeat:no-repeat;background-color:rgb(255,255,255)\"><table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"><tbody><tr><td class=\"m_-7007847074773734180logo\" align=\"center\" style=\"padding:46px 0 0 0\"> <a href=\"https://www.netflix.com/browse?lnktrk=EMP&amp;g=D69DCDE81748F63C07FC9F401D9749E06451B99C&amp;lkid=URL_HOME\" style=\"color:inherit\" target=\"_blank\" data-saferedirecturl=\"https://www.google.com/url?hl=en&amp;q=https://www.netflix.com/browse?lnktrk%3DEMP%26g%3DD69DCDE81748F63C07FC9F401D9749E06451B99C%26lkid%3DURL_HOME&amp;source=gmail&amp;ust=1564235301686000&amp;usg=AFQjCNHTkiPBsQr0fR76yxGdCw4F6DYyKQ\"> <img src=\"./images/netflix.png\" alt=\"Netflix\" width=\"145\" align=\"center\" style=\"border:none;outline:none;border-style:none\"> </a> </td></tr><tr><td class=\"m_-7007847074773734180headline\" align=\"left\" style=\"font-family:Helvetica,Arial,sans;font-weight:bold;font-size:32px;color:rgb(34,31,31);line-height:36px;padding:40px 90px 10px 90px\"> Security Alert</td></tr><tr><td class=\"m_-7007847074773734180copy\" align=\"left\" style=\"padding:22px 90px 0 90px;font-family:Helvetica Neue,Helvetica,Roboto,Segoe UI,sans-serif;font-size:18px;line-height:24px;color:rgb(34,31,31)\"> <span class=\"ph_content\">Hello, </span><span id=\"ph_email\">email</span> </td></tr><tr><td class=\"m_-7007847074773734180copy\" align=\"left\" style=\"padding:22px 90px 0 90px;font-family:Helvetica Neue,Helvetica,Roboto,Segoe UI,sans-serif;font-size:18px;line-height:24px;color:rgb(34,31,31)\"> <span class=\"ph_content\">We have noticed some suspicious activity on your Netflix account. In order to improve your security, we suggest changing your password and reviewing recent logins into your account.</span> </td></tr><tr><td class=\"m_-7007847074773734180copy\" align=\"left\" style=\"padding:22px 90px 0 90px;font-family:Helvetica Neue,Helvetica,Roboto,Segoe UI,sans-serif;font-size:18px;line-height:24px;color:rgb(34,31,31)\"> <span id=\"ph_hyperlink\">Click here to change your password or manage authorized accounts. </span><span class=\"content\"></span> If you notice a login from a location you don't recognise, contact Netflix support at seucrity@netflix.com. We value your security and will do everything we can to ensure your account is safe.</span></td></tr><tr><td class=\"m_-7007847074773734180copy\" align=\"left\" style=\"padding:22px 90px 0 90px;font-family:Helvetica Neue,Helvetica,Roboto,Segoe UI,sans-serif;font-size:18px;line-height:24px;color:rgb(34,31,31)\"><span class=\"ph_content\">Thank you.</span></td></tr><tr><td class=\"m_-7007847074773734180copy\" align=\"left\" style=\"padding:22px 90px 0 90px;font-family:Helvetica Neue,Helvetica,Roboto,Segoe UI,sans-serif;font-size:18px;line-height:24px;color:rgb(34,31,31)\"> <span class=\"ph_content\">We're here to help if you need it. Visit the </span> <a href=\"https://help.netflix.com/support/62990?lnktrk=EMP&amp;g=D69DCDE81748F63C07FC9F401D9749E06451B99C&amp;lkid=URL_HELP\" style=\"color:inherit;font-family:Helvetica,Arial,sans;text-decoration:underline;color:inherit\" target=\"_blank\" data-saferedirecturl=\"https://www.google.com/url?hl=en&amp;q=https://help.netflix.com/support/62990?lnktrk%3DEMP%26g%3DD69DCDE81748F63C07FC9F401D9749E06451B99C%26lkid%3DURL_HELP&amp;source=gmail&amp;ust=1564235301686000&amp;usg=AFQjCNGm-14N_3IYEyxn8Ftu6HuFxp8pCg\">Help Centre</a> for more info or <a href=\"https://help.netflix.com/contactus?lnktrk=EMP&amp;g=D69DCDE81748F63C07FC9F401D9749E06451B99C&amp;lkid=URL_CONTACT\" style=\"color:inherit;font-family:Helvetica,Arial,sans;text-decoration:underline;color:inherit\" target=\"_blank\" data-saferedirecturl=\"https://www.google.com/url?hl=en&amp;q=https://help.netflix.com/contactus?lnktrk%3DEMP%26g%3DD69DCDE81748F63C07FC9F401D9749E06451B99C%26lkid%3DURL_CONTACT&amp;source=gmail&amp;ust=1564235301686000&amp;usg=AFQjCNHRReNdlurq8a2SqqWqthYsGy3FTw\">contact us</a>. </td></tr><tr><td class=\"m_-7007847074773734180copy\" align=\"left\" style=\"padding:22px 90px 0 90px;font-family:Helvetica Neue,Helvetica,Roboto,Segoe UI,sans-serif;font-size:18px;line-height:24px;color:rgb(34,31,31)\"> – The Netflix Team <br><br><br></td></tr></body></html>";
+        
+        var legit = document.getElementById("legit");
+
+        var elem = document.querySelector('input[type="range"]');
+       // var sitechoice = GNB(1,2); // FOR TESTING PURPOSES ONLY
+
+        var rangeValue = function() {
+            var diff = elem.value;
+            var target = document.querySelector('.value');
+            target.innerHTML = diff;
+            resetDOM();
+            init(parseInt(diff));
+        }
+
+        if (elem.addEventListener) {
+            //console.log("1");
+            elem.addEventListener("mouseup", rangeValue, false);
+        }
+        else if (elem.attachEvent) {
+            //console.log("2");
+            elem.attachEvent("on"+"input", rangeValue);
+        }
+
+        var nextEmail = function() {
+            gameDifficulty += 20;
+            resetDOM();
+            init(gameDifficulty, emailTemplates[GNB(0, emailTemplate.length-1)]);
+        }
+
+        legit.addEventListener("onclick", nextEmail)
+        init(gameDifficulty, emailTemplates[GNB(0, emailTemplates.length-1)]);
+
+    function init(dif, template) { 
+        difficulty = dif/100;
+        //console.log(difficulty);
+
+        //companylist = ["Spotify", "Now Music", "uTorrent", "A Facebook friend", "Messenger", "Facebook", "Clash of Clans", "WhatsApp", "Instagram", "Twitter", "Snapchat", "Candy Crush", "Steam", "Uber", "Uber Eats", "Barclays Bank", "Monzo Bank", "Norton", "Youtube", "Youtube Gaming", "Netflix", "Rabbit", "Amazon", "Play Store", "Tinder"];
+        useralias = ["User", "Customer", "Valued Customer", "Sir/Madam", "macsmith05924"];
+        myName = "Mac Smith";
+        myEmail = "macsmith05924@gmail.com";
+        myEmailLocal = myEmail.split("@")[0];
+        head = document.head; //required for generation
+        content = document.getElementById("email_content");
+
+        real = false; //need to set dynamically.
+
+        mCount = 0; //ammount of missed characters (globally)
+        dCount = 0; //ammount of double tapped characters (globally)
+        mLimit = 4; //global miss limit
+        dLimit = 5; //global double  tap limit
+
+        if (difficulty < 0.5) { //should probably change this
+                myName = useralias[GNB(0, useralias.length-1)];
+            } else {
+                myName = "Mac Smith";
+        }
+
+        generateEmail(template);
+        //generateGmail();
+        //generatePayPal();
+}
+
+    function resetDOM(){ 
+        var d = document.getElementById("details");
+        var e = document.getElementById("email_content");
+        var h = document.head;
+
+        removeChildElements(d);
+        removeChildElements(e);
+        removeChildElements(h);
+
+        for (var i = 0; i < originalDOM.head.childNodes.length; i++) {
+            document.head.appendChild(originalDOM.head.childNodes[i].cloneNode(true));
+        }
+    }
+
+
+    function generatePayPal() {
+            var senderName = "Paypal";
+            var senderAddr = generateAddress("service@paypal.com", "email");
+            //var company = companylist[GNB(0, companylist.length-1)];
+            generateHeader(senderName, senderAddr);
+
+            var amount = GNB(1, 4)
+            var fakeTotalCost = GNB(5, 65).toFixed(2);
+            var fakeVAT = (fakeTotalCost*0.20).toFixed(2);
+            var fakeUnitCost = ((fakeTotalCost/amount)*0.8).toFixed(2);
+
+            var head = document.head;
+            var content = document.getElementById("email_content");
+
+            var paypalHTML = "<html lang=\"en\"> <head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><style type=\"text/css\" nonce=\"\">body,td,div,p,a,input {font-family: arial, sans-serif;}body, td {font-size:13px} a:link, a:active {color:#1155CC; text-decoration:none} a:hover {text-decoration:underline; cursor: pointer} a:visited{color:##6611CC} img{border:0px} pre { white-space: pre; white-space: -moz-pre-wrap; white-space: -o-pre-wrap; white-space: pre-wrap; word-wrap: break-word; max-width: 800px; overflow: auto;} .logo { left: -7px; position: relative; }</style></head><body><div class=\"bodycontainer\"><div style=\"padding:0;margin:0;background:#ffffff\"></div><div style=\"display:none;display:none!important;color:#fff;font-size:1pt\">9 Jul 2019 19:08:00 PDTTransaction ID:592OKSEFOKOL &nbsp;<a href=\"#\" target=\"_blank\" data-saferedirecturl=\"\"></a>..</div><table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\"><tbody><tr><td bgcolor=\"#ffffff\" style=\"font-size:0px\">&nbsp;</td><td bgcolor=\"#ffffff\" width=\"660\" align=\"center\"><table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\"><tbody><tr><td align=\"center\" width=\"600\" valign=\"top\"><table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"><tbody><tr><td bgcolor=\"#ffffff\" style=\"padding-top:10px\"></td></tr><tr><td bgcolor=\"#ffffff\" style=\"padding-top:10px\"></td></tr><tr><td align=\"center\" valign=\"top\" bgcolor=\"#ffffff\"><table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin-bottom:10px\" width=\"100%\"><tbody><tr valign=\"bottom\"><td width=\"20\" align=\"center\" valign=\"top\">&nbsp;</td><td align=\"left\" height=\"64\"><img alt=\"paypal\" style=\"width:113px;height:46px\" width=\"113\" height=\"46\" border=\"0\" src=\"./images/paypal.gif\"></td><td width=\"40\" align=\"center\" valign=\"top\">&nbsp;</td><td align=\"right\"><span><span style=\"display:inline\">9 Jul 2019 19:08:00 PDT</span><span style=\"display:inline\"><span style=\"display:inline\"><br>Transaction ID: <span id =\"transaction_id\"></span></span></span></span></td><td width=\"20\" align=\"center\" valign=\"top\">&nbsp;</td></tr></tbody></table><table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin-bottom:10px\" width=\"100%\"><tbody><tr valign=\"bottom\"><td width=\"20\" align=\"center\" valign=\"top\">&nbsp;</td><td valign=\"top\" style=\"font-family:Calibri,Trebuchet,Arial,sans serif;font-size:15px;line-height:22px;color:#333333\"><div style=\"color:#333!important;font-family:arial,helvetica,sans-serif;font-size:12px\"><span id=\"intro_content\" style=\"color:#333333!important;font-weight:bold;font-family:arial,helvetica,sans-serif\"></span><br><p id=\"title_content\" style=\"font-size:14px;color:#c88039;font-weight:bold;text-decoration:none\"></p><table cellpadding=\"5\"><tbody><tr><td id=\"main_content\" valign=\"top\"></td><td></td></tr></tbody></table><br>It may take a few moments for this transaction to appear in your account.<table align=\"left\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"color:#666666!important;font-family:arial,helvetica,sans-serif;font-size:11px;margin-bottom:20px;clear:both\" width=\"100%\"><tbody><tr><td style=\"padding-top:15px;padding-right:10px\" valign=\"top\" width=\"50%\"><span style=\"color:#333333;font-weight:bold\">Merchant</span><br><span id=\"merchant\" style=\"display:inline\"><br></span><br><span style=\"display:inline\"></span></td><td style=\"padding-top:15px\" valign=\"top\" width=\"50%\"><span style=\"color:#333333;font-weight:bold\">Instructions to merchant</span><br><span style=\"display:inline\">You haven't entered any instructions.</span></td></tr><tr><td><span style=\"display:inline\"></span></td></tr><tr><td style=\"padding-top:15px;padding-right:10px\" valign=\"top\" width=\"50%\"><span style=\"display:inline\"></span></td><td style=\"padding-top:15px\" valign=\"top\" width=\"50%\"><span style=\"display:inline\"></span></td></tr></tbody></table><span style=\"display:inline\"><table align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"clear:both;color:#666666!important;font-family:arial,helvetica,sans-serif;font-size:11px\" width=\"100%\"><tbody><tr><td style=\"border:1px solid #ccc;border-right:none;border-left:none;padding:5px 10px 5px 10px!important;color:#333333!important\" width=\"40%\">Description</td><td align=\"right\" style=\"border:1px solid #ccc;border-right:none;border-left:none;padding:5px 10px 5px 10px!important;color:#333333!important\" width=\"20%\">Unit price</td><td align=\"right\" style=\"border:1px solid #ccc;border-right:none;border-left:none;padding:5px 10px 5px 10px!important;color:#333333!important\" width=\"15%\">Qty</td><td align=\"right\" style=\"border:1px solid #ccc;border-right:none;border-left:none;padding:5px 10px 5px 10px!important;color:#333333!important\" width=\"25%\">Amount</td></tr><tr><td style=\"padding:10px\" width=\"40%\"><br></td><td align=\"right\" style=\"padding:10px\" width=\"20%\"><span id=\"unit_price\" style=\"display:inline\"></span></td><td id=\"quantity\" align=\"right\" style=\"padding:10px\" width=\"15%\"></td><td align=\"right\" style=\"padding:10px\" width=\"25%\"><span id=\"amount\" style=\"display:inline\"></span></td></tr></tbody></table></span><table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-top:1px solid #ccc;border-bottom:1px solid #ccc;clear:both;color:#666666!important;font-family:arial,helvetica,sans-serif;font-size:11px\" width=\"100%\"><tbody><tr><td><span style=\"display:inline\"></span></td></tr><tr><td><table align=\"right\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"color:#666666!important;font-family:arial,helvetica,sans-serif;font-size:11px;margin-top:20px;clear:both;width:100%\"><tbody><tr><td style=\"width:75%;text-align:right;padding:0 10px 0 0\"><strong>Subtotal</strong></td><td style=\"width:25%;text-align:right;padding:0 10px 0 0\"><span id=\"subtotal\" style=\"display:inline\"></span></td></tr><tr><td style=\"width:75%;text-align:right;padding:0 10px 0 0\"><span style=\"display:inline\">Tax</span></td><td id=\"tax\" style=\"width:25%;text-align:right;padding:0 10px 0 0\"></td></tr><tr><td style=\"width:75%;text-align:right;padding:0 10px 0 0\"><span style=\"color:#333333!important;font-weight:bold\">Total</span></td><td style=\"width:25%;text-align:right;padding:0 10px 0 0\"><span id=\"total\" style=\"display:inline\"></span></td></tr><tr><td><span style=\"display:inline\"></span></td></tr><tr><td style=\"width:75%;text-align:right;padding:20px 10px 0 0\"><span style=\"color:#333333!important;font-weight:bold\">Payment</span></td><td id=\"payment\" style=\"width:25%;text-align:right;padding:20px 10px 0 0\"></td></tr><tr><td colspan=\"2\" style=\"width:100%;text-align:right;padding:10px 10px 10px 0\"></td></tr><tr><td colspan=\"2\" style=\"width:100%;text-align:right;padding:10px 10px 10px 0\"></td></tr></tbody></table></td></tr><tr><td style=\"color:#757575;padding-bottom:20px;padding-left:10px\"><br><span id=\"invoice_id\" style=\"padding-left:10px\">Invoice ID:</span></td></tr></tbody></table><br><span style=\"clear:left;font-weight:bold;color:#333333\">Issues with this transaction?</span><br><span style=\"display:inline\">You have 180 days from the date of the transaction to open a dispute in the Resolution Center.</span><span style=\"display:inline\"><br><br><img src=\"./images/quest.gif\" style=\"margin-right:5px;vertical-align:middle\">Questions? Go to the Help Center at <a href=\"http://www.paypal.com/uk/help\" target=\"_blank\" data-saferedirecturl=\"\">www.paypal.com/uk/help</a>.</span><br><br><span style=\"font-size:11px;color:#333\">Please do not reply to this email. This mailbox is not monitored and you will not receive a response. <span style=\"display:inline\">For assistance, log in to your PayPal account and click <strong>Help</strong> in the top right corner of any PayPal page.</span></span><br><span style=\"font-size:11px;color:#333\">You can receive plain text emails instead of HTML emails. To change your Notifications preferences, log in to your account, go to your Profile, and click <strong>My settings</strong>.<br></span></div><table><tbody><tr><td></td></tr></tbody></table><span style=\"font-weight:bold;color:#444\"></span><span></span></td><td width=\"20\" align=\"center\" valign=\"top\">&nbsp;</td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table><table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\"><tbody><tr><td align=\"center\" width=\"600\" valign=\"top\"><table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"><tbody><tr><td align=\"center\" valign=\"top\" bgcolor=\"#ffffff\"><table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tbody><tr valign=\"bottom\"><td width=\"20\" align=\"center\" valign=\"top\">&nbsp;</td><td><span><table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" id=\"m_-2348506855766119411emailFooter\" style=\"padding-top:20px;font:12px Arial,Verdana,Helvetica,sans-serif;color:#292929\" width=\"100%\"><tbody><tr><td><p>Copyright © 1999-2019 PayPal. All rights reserved.</p><p>PayPal (Europe) S.à r.l. et Cie, S.C.A. Société en Commandite par Actions Registered Office: 22-<a href=\"https://www.google.com/maps/search/24+Boulevard+Royal+L-2449,+Luxembourg?entry=gmail&amp;source=g\">24 Boulevard Royal L-2449, Luxembourg</a> RCS Luxembourg B 118 349</p></td></tr></tbody></table><img src=\"./images/quest.gif\" alt=\"\" height=\"1\" width=\"1\" border=\"0\"></span></td><td width=\"20\" align=\"center\" valign=\"top\">&nbsp;</td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table></td><td bgcolor=\"#ffffff\" style=\"font-size:0px\">&nbsp;</td></tr></tbody></table></div></font></div></td></tr></tbody></table></td></tr></tbody></table></div></div></body></html>";
+            var paypalDOM = new DOMParser().parseFromString(paypalHTML, "text/html");
+
+            var p_intro = paypalDOM.getElementById("intro_content"), p_title = paypalDOM.getElementById("title_content");
+            var p_main = paypalDOM.getElementById("main_content");
+            var p_merchant = paypalDOM.getElementById("merchant");
+            var p_unit_price = paypalDOM.getElementById("unit_price");
+            var p_quantity = paypalDOM.getElementById("quantity");
+            var p_amount = paypalDOM.getElementById("amount");
+            var p_subtotal = paypalDOM.getElementById("subtotal");
+            var p_tax = paypalDOM.getElementById("tax");
+            var p_total = paypalDOM.getElementById("total");
+            var p_payment = paypalDOM.getElementById("payment");
+            var p_invoice = paypalDOM.getElementById("invoice_id");
+            var p_transaction = paypalDOM.getElementById("transaction_id");
+            
+            addText(p_intro, "Hello " + myName + ",");
+            addText(p_title, "You sent a payment of £" + fakeTotalCost + " GBP to " + company);
+            addText(p_main, "You've sent a payment of "+ fakeTotalCost + " GBP to " + company + ", and you'll be billed with PayPal Credit through your PayPal account.\n\n We'll send you an email when your statement is ready. For more information, or to schedule a payment to PayPal Credit, just visit PayPal.");
+            addText(p_main, "\n\n If you did not make this payment", "bold");
+            addText(p_main, ", click here to review your account security ", "hyperlink", generateAddress("https://paypal.com/manage_account/%d=19525k&%s=account_security", "url"));
+            addText(p_main, "or alternatively you can ");
+            addText(p_main, "request an immediate refund.", "hyperlink", generateAddress("https://paypal.com/manage_account/%d=19525k&%s=review_payments%t=3", "url"));
+            addText(p_merchant, company + "\n");
+            addText(p_unit_price, "£" + fakeUnitCost + " GBP")
+            addText(p_quantity, amount.toString());
+            addText(p_amount, "£" + (fakeUnitCost*amount).toFixed(2) + " GBP");
+            addText(p_subtotal, "£" + (fakeUnitCost*amount).toFixed(2) + " GBP");
+            addText(p_tax, "£" + fakeVAT + " GBP");
+            addText(p_total, "£" + fakeTotalCost + " GBP");
+            addText(p_payment, "£" + fakeTotalCost + " GBP")
+            addText(p_invoice, " " + generateRandomNumberString(12));
+            addText(p_transaction, " " + generateTransactionID(15));
+
+            imbedElements(document, paypalDOM);
+
+        }
+
+    function generateEmail(html) { //generic
+        var emailDOM = new DOMParser().parseFromString(html, "text/html");
+        
+        var senderName = getMeta("ph_sender", emailDOM);
+        var senderAddr = getMeta("ph_address", emailDOM);
+        generateHeader(senderName, generateAddress(senderAddr, "email"));
+
+        var url = generateAddress(getMeta("ph_url", emailDOM), "url");
+
+        var content = emailDOM.getElementsByClassName("ph_content");
+        for (var i = 0; i < content.length; i++) {
+            let string = content[i].innerHTML;
+            removeChildElements(content[i]);
+            addText(content[i], string);
+        }
+
+        var email = emailDOM.getElementById("ph_email");
+        if (email) {
+            removeChildElements(email);
+            addText(email, myEmail);
+        }
+
+        var hyperlink = emailDOM.getElementById("ph_hyperlink");
+        if (hyperlink) {
+            var string = hyperlink.innerHTML;
+            removeChildElements(hyperlink);
+            addText(hyperlink, string, "hyperlink", url);
+        }
+        imbedElements(document, emailDOM);
+    }
+    
+    function generateGmail() {
+            var senderName = "Google";
+            var senderAddr = generateAddress("no-reply@google.com", "email");
+            //console.log(senderAddr);
+            //var company = companylist[GNB(0, companylist.length-1)];
+            generateHeader(senderName, senderAddr);
+
+            //Email body generation begins here
+            var googleHTML = "<html lang=\"en\"><head> <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> <style type=\"text/css\" nonce=\"\"> body,td,div,p,a,input {font-family: arial, sans-serif;} body, td {font-size:13px} a:link, a:active {color:#1155CC; text-decoration:none} a:hover {text-decoration:underline; cursor: pointer} a:visited{color:##6611CC} img{border:0px} pre { white-space: pre; white-space: -moz-pre-wrap; white-space: -o-pre-wrap; white-space: pre-wrap; word-wrap: break-word; max-width: 800px; overflow: auto;} .logo { left: -7px; position: relative; } </style> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"></head><body> <div class=\"bodycontainer\"> <!-- <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"> <tbody> <tr height=\"14px\"> <td width=\"143\"><img src=\"./images/logonew.gif\" width=\"143\" height=\"59\" alt=\"Gmail\" class=\"logo\"></td> <td align=\"right\"> <font size=\"-1\" color=\"#777\"><b>Joe Smith &lt;merklemore@gmail.com&gt;</b></font> </td> </tr> </tbody> </table> <hr> --> <div class=\"maincontent\"> <!-- <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"> <tbody> <tr> <td> <font size=\"+1\"><b>App password created</b></font><br></td> </tr> </tbody> </table> <hr> --> <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" class=\"message\"> <tbody> <!-- <tr> <td> <font size=\"-1\"><b>Google </b>&lt;no-reply@accounts.google.com&gt;</font> </td> <td align=\"right\"> <font size=\"-1\">Thu, Jul 18, 2019 at 4:50 PM</font> </td> </tr> <tr> <td colspan=\"2\" style=\"padding-bottom: 4px;\"> <font size=\"-1\" class=\"recipient\"> <div>To: merklemore@gmail.com</div> </font> </td> </tr> --> <tr> <td colspan=\"2\"> <table width=\"100%\" cellpadding=\"12\" cellspacing=\"0\" border=\"0\"> <tbody> <tr> <td> <div style=\"overflow: hidden;\"> <font size=\"-1\"><u></u> <div style=\"margin:0;padding:0\" bgcolor=\"#FFFFFF\"><img src=\"./images/unnamed.gif\" width=\"1\" height=\"1\"> <table width=\"100%\" height=\"100%\" style=\"min-width:348px\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" lang=\"en\"> <tbody> <tr height=\"32\" style=\"height:32px\"> <td></td> </tr> <tr align=\"center\"> <td width=\"32\" style=\"width:32px\"></td> <td> <table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" style=\"max-width:600px\"> <tbody> <tr> <td> <table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\"> <tbody> <tr> <td align=\"left\"><img width=\"92\" height=\"32\" src=\"./images/unnamed.png\" style=\"display:block;width:92px;height:32px\"></td> <td align=\"right\"><img width=\"32\" height=\"32\" style=\"display:block;width:32px;height:32px\" src=\"./images/unnamed(1).png\"></td> </tr> </tbody> </table> </td> </tr> <tr height=\"16\"></tr> <tr> <td> <table bgcolor=\"#E6E6E6\" width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" style=\"min-width:332px;max-width:600px;border:1px solid #f0f0f0;border-bottom:0;border-top-left-radius:3px;border-top-right-radius:3px\"> <tbody> <tr> <td height=\"72\" style=\"height:72px\" colspan=\"3\"></td> </tr> <tr> <td width=\"32\" style=\"width:32px\"></td> <td id=\"title_content\" style=\"font-family:Roboto-Regular,Helvetica,Arial,sans-serif;font-size:24px;color:#000000;line-height:1.25;min-width:300px\"></td> <td width=\"32\" style=\"width:32px\"></td> </tr> <tr> <td height=\"18\" style=\"height:18px\" colspan=\"3\"></td> </tr> </tbody> </table> </td> </tr> <tr> <td> <table bgcolor=\"#FAFAFA\" width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" style=\"min-width:332px;max-width:600px;border:1px solid #f0f0f0;border-bottom:1px solid #c0c0c0;border-top:0;border-bottom-left-radius:3px;border-bottom-right-radius:3px\"> <tbody> <tr height=\"16\" style=\"height:16px\"> <td width=\"32\" rowspan=\"3\" style=\"width:32px\"></td> <td></td> <td width=\"32\" rowspan=\"3\" style=\"width:32px\"></td> </tr> <tr> <td> <table style=\"min-width:300px\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\"> <tbody> <tr> <td id=\"intro_content\" style=\"font-family:Roboto-Regular,Helvetica,Arial,sans-serif;font-size:13px;color:#202020;line-height:1.5;padding-bottom:4px\"></td> </tr> <tr> <td id=\"main_content\" style=\"font-family:Roboto-Regular,Helvetica,Arial,sans-serif;font-size:13px;color:#202020;line-height:1.5;padding:4px 0\"></td> </tr> <tr> <td style=\"font-family:Roboto-Regular,Helvetica,Arial,sans-serif;font-size:13px;color:#202020;line-height:1.5;padding-top:28px\">The Google Accounts team</td> </tr> <tr height=\"16\" style=\"height:16px\"></tr> <tr> <td> <table style=\"font-family:Roboto-Regular,Helvetica,Arial,sans-serif;font-size:12px;color:#b9b9b9;line-height:1.5\"> <tbody> <tr> <td>This email can't receive replies. For more information, visit the <a href=\"https://support.google.com/accounts/answer/185833\" style=\"text-decoration:none;color:#4285f4\" target=\"_blank\" data-saferedirecturl=\"https://www.google.com/url?hl=en&amp;q=https://support.google.com/accounts/answer/185833&amp;source=gmail&amp;ust=1563800912913000&amp;usg=AFQjCNFTQFiCAkFkqbxEbSUI0zrX1YGxtg\">Google Accounts Help Center</a>.</td> </tr> </tbody> </table> </td> </tr> </tbody> </table> </td> </tr> <tr height=\"32\" style=\"height:32px\"></tr> </tbody> </table> </td> </tr> <tr height=\"16\" style=\"height:16px\"></tr> <tr> <td style=\"max-width:600px;font-family:Roboto-Regular,Helvetica,Arial,sans-serif;font-size:10px;color:#bcbcbc;line-height:1.5\"> <table> <tbody> <tr> <td> <table style=\"font-family:Roboto-Regular,Helvetica,Arial,sans-serif;font-size:10px;color:#666666;line-height:18px;padding-bottom:10px\"> <tbody> <tr> <td>You received this mandatory email service announcement to update you about important changes to your Google product or account.</td> </tr> <tr height=\"6\" style=\"height:6px\"></tr> <tr> <td> <div style=\"direction:ltr;text-align:left\">© 2019 Google LLC, <a href=\"https://www.google.com/maps/search/1600+Amphitheatre+Parkway,+Mountain+View,+CA+94043,+USA?entry=gmail&amp;source=g\">1600 Amphitheatre Parkway, Mountain View, CA 94043, USA</a></div> </td> </tr> </tbody> </table> </td> </tr> </tbody> </table> </td> </tr> </tbody> </table> </td> <td width=\"32\" style=\"width:32px\"></td> </tr> <tr height=\"32\" style=\"height:32px\"> <td></td> </tr> </tbody> </table> </div> </font> </div> </td> </tr> </tbody> </table> </td> </tr> </tbody> </table> </div> </div></body></html>";
+            var googleDOM = new DOMParser().parseFromString(googleHTML, "text/html");
+
+            var g_title = googleDOM.getElementById("title_content"); //vars for key elements
+            var g_intro = googleDOM.getElementById("intro_content");
+            var g_main = googleDOM.getElementById("main_content");
+
+            var fakeHyper = generateAddress("https://google.com/accounts/manage_apps%s=mv9123905&i=manage", "url");
+
+            addText(g_title, company + " was granted access to your account.");
+            addText(g_intro, "Hi " + myName + ",");
+            addText(g_main, "You have succesfully connected " + company + " to your Google Account " + myEmail + " on Thursday, July 22, 2019 3:50 PM (GMT).");
+            addText(g_main, "\n\nIf you did not perform this action then please change your password as soon as possible. ", "bold");
+            addText(g_main, "Click here", "hyperlink", fakeHyper, false);
+            addText(g_main, " to reset your password or manage authorized devices.")
+
+            imbedElements(document, googleDOM);
+       
+        }
+
+    function generateTransactionID(length) {
+        var result = "";
+        var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789"
+        for ( var i = 0; i < length; i++ ) {
+            result += chars.charAt(GNB(0, chars.length-1));
+        }
+        return result;
+    }
+
+    function getMeta(metaName, dom) {
+
+        var metas = dom.getElementsByTagName('meta');
+
+        for (let i = 0; i < metas.length; i++) {
+            if (metas[i].getAttribute('name') === metaName) {
+                return metas[i].getAttribute('content');
+            }
+        }
+        return "NA";
+}
+
+    function generateRandomNumberString(length) {
+        var result = "";
+        for ( var i = 0; i < length; i++ ) {
+            result += GNB(1,10);
+        }
+        return result;
+    }
+
+    function generateHeader(senderName, senderAddr){ 
+        var details = document.getElementById("details"); //Email header information (From: / To:)
+        addText(details, senderName, "bold", "none", true); 
+        addText(details, " <" + senderAddr + ">\n To: me <" + myEmail + ">", "plain", "none", true);
+    }
+
+    function imbedElements(main, email) {
+            var style = main.head.querySelector("style"); //base style
+            var eStyle = email.head.querySelector("style"); //email style
+
+            var scrambledHeaderCSS = scrambleHeaderCSS(eStyle.innerHTML);
+            var merged_style = email.createTextNode(scrambledHeaderCSS + "\n" + style.innerHTML); //merged style
+            
+            removeChildElements(eStyle);
+            eStyle.appendChild(merged_style);
+            head.parentNode.replaceChild(email.head, head);
+
+            scrambleBodyCSS(email.body);
+
+            for (var i = 0; i < email.body.childNodes.length; i++) {
+                content.appendChild(email.body.childNodes[i].cloneNode(true));
+            }
+    }
+
+    function scrambleBodyCSS(body) {
+        var elements = body.getElementsByTagName("*");
+        
+        for (var i = 0; i < elements.length; i++) {
+
+            if (elements[i].getAttribute("bgcolor")) {
+                if (scaledChance(0.15)) {
+                    elements[i].setAttribute("bgcolor", "#ffffff");
+                }
+            }
+
+            if (elements[i].getAttribute("width")) {
+                if (scaledChance(0.15)) {
+                    elements[i].setAttribute("width", "auto");
+                }
+            }
+
+            if (elements[i].getAttribute("src")) {
+                if (scaledChance(0.85)) {
+                    elements[i].setAttribute("src", "#");
+                }
+            }
+
+            if (!(elements[i].style.cssText == "" || elements[i].style == null || !elements[i].style)) {
+                var style = elements[i].style;
+                var newStyle = "";
+                var attributes = style.cssText.toString().split(";");
+
+                for (var k = 0; k < attributes.length-1; k++) {
+                    if (scaledChance(0.15)) {
+                        continue;
+                    }
+                    else {
+                        newStyle += attributes[k] + ";";
+                    }
+                }
+                elements[i].setAttribute("style", newStyle);
+            } 
+        }   
+    }
+
+    function scrambleHeaderCSS(css) {
+            var newCSS = "";
+            var elements = css.toString().split("}");
+            for (var i = 1; i < elements.length-1; i++) {
+                if (scaledChance(0.1)) {
+                    continue;
+                } else {
+                    newCSS += elements[i] + "}";
+                }
+            }
+        return newCSS;
+    }
+
+    function GNB(min, max) { //generate number between
+        return (Math.floor(Math.random() * (max - min + 1)) + min);
+    }
+
+    function scaledChance(base) {
+        sf = (1-difficulty) * base;
+        var d = Math.random();
+        if (d < sf) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    function addText(node, ostring, type, url, forceLegit){
+        var type = type || 'plain';
+        var url = (url || 'none');
+        var forceLegit = forceLegit || false;
+
+        if (!real && !forceLegit) { //if fake email
+            localmlimit = Math.ceil(ostring.length/75); //local miss limit
+            localdlimit = Math.ceil(ostring.length/75); //local double tap limit
+
+            localmCount = 0; //amount of misses
+            localdCount = 0; //amount of double taps
+
+            var string = "";
+                for (var i = 0; i < ostring.length; i++) { //iterate through each character
+
+                    if (scaledChance(0.05) && mCount < mLimit && localmCount < localmlimit ) { //miss character
+                        mCount++;
+                        localmCount++;
+                        continue;
+                    }
+                    else if (ostring.charAt(i) == " ") {
+                            if (scaledChance(0.15) && (dCount < dLimit) && (localdCount < localdlimit)) {
+                                string += "  ";
+                                dCount++;
+                                localdCount++;
+                                continue;
+                            }
+                            else {
+                                string += " ";
+                            }
+                    }
+                    else if (scaledChance(0.005) && (dCount < dLimit) && (localdCount < localdlimit)) {
+                        string += ostring.charAt(i) + ostring.charAt(i);
+                        dCount++;
+                        localdCount++;
+                        continue;
+                    }
+                    else {
+                        string += ostring.charAt(i);
+                    }
+                }
+
+        } else {
+
+            string = ostring; //if real just use original string
+        }
+
+        text = string.split("\n");
+        for (var i = 0; i < text.length; i++) {
+            if (i !== 0) {
+               node.appendChild(document.createElement("br"));
+            }
+            switch(type) {
+                case "plain": 
+                    node.appendChild(document.createTextNode(text[i]));
+                    break;
+                case "bold": 
+                    boldtxt = document.createElement("b");
+                    boldtxt.appendChild(document.createTextNode(text[i]));
+                    node.appendChild(boldtxt);
+                    break;
+                case "hyperlink":
+                    if (url === "none") {
+                        return;
+                    }
+                    hyperlink = document.createElement("span");
+                    hyperlink.setAttribute("class", "tt-hover");
+                    hyperlink.setAttribute("aria-label", url);
+                    hyperlink.appendChild(document.createTextNode(text[i]));
+                    node.appendChild(hyperlink);
+                    break;
+                default:
+                    break;
+            }   
+        }
+    }
+
+    function generateAddress(addr, type) { //working, but scaling is a bit off
+        
+        if (difficulty == 1) {
+            return addr;
+        }
+        var fakeAddr = "";
+        
+        var fakeLocals = ["alerts", "no-reply", "noreply", "security-alert", "security", "messages", "notifications", "notify", "response"];
+        var fakeSubs = ["redirect.user", "email.response", "verified.sender", "manage.https", "redirect.verified", "secure.redirect", "https.enabled", "response.secure", "redirect", "https-secured", "encrypted", "url.parse", "safe-redirect", "redirect-ssl", "verify-url", "secure-url", "secure-login"];
+        var TLDs = ["auto", "cc", "ur", "run", "net", "info", "gw", "mobi", "usl", "ca", "de", "ch", "jp", "es", "nl", "vip", "tc"];
+        var pairs = {"a":"ci", "d": "cl", "g": "cj", "m": "rn", "l": "1", "1": "l"}
+        var pairdep = [];
+
+        var limit = 0;
+        var dropped = false;
+        var singledomain = false;
+        
+        var local, linksplit, maindomain, subdomains; 
+
+        if (type == "email") {
+            local = addr.split("@")[0];
+            subdomains = addr.split("@")[1].split(".");
+        } else if (type == "url") {
+            linksplit = addr.split("/");
+            maindomain = linksplit[2];
+            subdomains = maindomain.split(".");
+        }
+
+        var TLD = subdomains[subdomains.length-1];
+        var SLD = subdomains[subdomains.length-2];
+
+        var domain = "";
+        if (type == "url") { 
+            fakeAddr+= "https://www.";
+        }
+
+        for (var i = 0; i < subdomains.length-2; i++) { //discover all main domain up to second level.
+            domain += subdomains[i];
+            if ((i+1) < subdomains.length-2) {
+                domain += ".";
+            }
+        }
+
+        if (type == "email") {
+            if (scaledChance(0.5)) {
+                fakeAddr += fakeLocals[GNB(0, fakeLocals.length-1)] + "@";
+            } 
+            else {
+                fakeAddr += local + "@";
+            }
+        }
+
+        if ((domain !== SLD) && domain !== "") { //if second level domain name is the entire domain
+            for (var i = 0; i < domain.length; i++) {
+                if (scaledChance(0.1) && !dropped) { 
+                    dropped = true;
+                    continue;
+                } else if ((domain.charAt(i) == ".") && (scaledChance(0.8))) {
+                    fakeAddr += "-";
+                }
+                else {
+                    fakeAddr += domain.charAt(i);
+                }
+            }
+        }
+        else {
+            singledomain = true; //enable single domain mode
+        }
+
+        fakeAddr += "%s"; //placeholder
+        var newSLD = "";
+
+        for (var i = 0; i < SLD.length; i++) {
+            if ((["a", "d", "g", "m", "l", "1"].indexOf(SLD.charAt(i)) !== -1) && ( pairdep.indexOf(SLD.charAt(i)) == -1 ) && (limit < 1) && !dropped) {
+                if (scaledChance(0.2)) { //chance of homographic attack (more likely at low difficulties)
+                    fakeAddr += pairs[SLD.charAt(i).toString()];
+                    newSLD += pairs[SLD.charAt(i).toString()];
+                    pairdep.push(SLD.charAt(i));
+                    limit += 1;
+                } else {
+                fakeAddr += SLD.charAt(i);
+                newSLD += SLD.charAt(i);
+                }
+            }
+            else {
+                fakeAddr += SLD.charAt(i);
+                newSLD += SLD.charAt(i);
+            }
+        }
+        
+        
+            if (SLD == newSLD) { //if no changes were made to second level domain name
+                if (singledomain) {
+                    if (type == "url") {
+                        fakeAddr = fakeAddr.replace("\%s", fakeSubs[GNB(0, fakeSubs.length-1)] + "-"); //add fake security prefix
+                    } else if (type == "email") {
+                        fakeAddr = fakeAddr.replace("\%s", fakeLocals[GNB(0, fakeLocals.length-1)] + "-"); //add fake security prefix
+                    }
+                    console.log(1);
+                } else {
+                    fakeAddr = fakeAddr.replace("\%s", "-");
+                    console.log(2);
+                }
+            } else {
+                if (singledomain) {
+                    fakeAddr = fakeAddr.replace("\%s", "");
+                    console.log(3);
+                } else {
+                    fakeAddr = fakeAddr.replace("\%s", ".");
+                    console.log(4);
+                }
+            }
+
+        if (scaledChance(0.9)) { 
+            fakeAddr += "." + TLDs[GNB(0, TLDs.length-1)];
+        } else {
+            fakeAddr += "." + TLD;
+        }
+        
+        if (type == "url") {
+            for (var j = 3; j < linksplit.length; j++) { //add the rest of the url content
+                fakeAddr += "/" + linksplit[j];
+            }
+        }
+
+        return fakeAddr;
+    }
+
+    function removeChildElements(parent) { 
+            while (parent.firstChild) {
+                parent.removeChild(parent.firstChild);
+            }
+        }
+
+    </script>
+    </body>
+</html>
