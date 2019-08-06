@@ -9,6 +9,47 @@
 			font-family: Verdana;
             overflow:auto;
         }
+        
+        .flashCorrect {
+            animation: flashCorrect 0.5s forwards linear normal;
+            animation-iteration-count: 1;
+        }
+
+        @keyframes flashCorrect {
+            0% {
+                background:#1f1a25;
+            }
+            20% {
+                background:green;
+            }
+            75% {
+                background: green;
+            }
+            100% {
+                background:#1f1a25;
+            }
+        }
+
+        .flashIncorrect {
+            animation: flashIncorrect 2.5s forwards linear normal;
+            animation-iteration-count: 1;
+        }
+
+        @keyframes flashIncorrect {
+            0% {
+                background:#1f1a25;
+            }
+            15% {
+                background:red;
+            }
+            90% {
+                background: red;
+            }
+            100% {
+                background:#1f1a25;
+            }
+        }
+
         #game_container {
             width: auto;
             position:relative;
@@ -18,7 +59,7 @@
             display: block;
             width: auto;
             height: auto;
-            margin: auto auto 20px auto;
+            margin: auto auto 10px auto;
             text-align:center;
             position:relative;
 
@@ -214,7 +255,7 @@
 
         #score_container {
             color: white;
-            display: block;
+            display: inline-block;
             border-radius: 5px;
             border: 2px solid white;
             font: 700 1.5rem 'Roboto Slab', sans-serif;
@@ -226,8 +267,47 @@
         }
 
         #scoreText {
-            color: white;
+            color: #61fff2;
+            float: left;
         }
+        #timer {
+            color: white;
+            float: right;
+        }
+
+        #diffbar {
+            margin-bottom: 3px;
+            display: inline-block;
+            background: rgb(255, 255, 255);
+            width: 250px;
+            height: 8px;
+            border-top-right-radius: 15px;
+            border-bottom-right-radius: 15px;
+            overflow: hidden;
+        }
+        
+        #progress {
+            position: relative;
+            right: 105%;
+            background: rgb(223, 28, 28);
+            width: 250px;
+            height: 8px;
+            border-top-right-radius: 15px;
+            border-bottom-right-radius: 15px;
+            transition: right 1.5s, background 1.5s;
+        }
+
+        #diffText {
+            color: white;
+            display: inline-block;
+            font: 700 1em 'Roboto Slab', sans-serif;
+            letter-spacing: 0.05rem;
+        }
+
+        .typo {
+            background: none;
+        }
+
         </style>
 
     </head>
@@ -236,7 +316,11 @@
                 <div id="game_panel">
                         <button id="legit" class="answer_button draw-border">Legit</button>
                         <button id="phish" class="answer_button draw-border">Phish</button>
-                        <p id="score_container">Score: <span id="scoreText">5</span></p>
+                        <br>
+                        <div id="score_container"><span id="scoreText">Score: 0</span>
+                            <span id="diffText">Difficulty:&nbsp&nbsp</span><div id="diffbar"><div id="progress"> </div></div>
+                        <span id="timer">1:30</span></div> <br>
+                        
                 </div>
                 <!-- <div class="value">100</div>
                     <input type="range" onmin="1" max="100" step="1" value="100">
@@ -249,19 +333,44 @@
             </div>
 
     <script>
+         var second = 30;
+         var minute = 1;
+        
+         var refreshIntervalId = setInterval(function(){ //timer
+            if (second < 10) {
+                second = "0" + second.toString();
+            }
+            document.getElementById("timer").innerHTML = minute + ":" + second;
+            second--;
+
+            if((minute >= 1 ) && (second == 00)){
+                minute--;
+                second = 60;
+            }
+            if(minute == 0 && second < 0){
+                document.getElementById("timer").innerHTML = "00:00";
+                 console.log("end");
+                //document.getElementById("timer").innerHTML = "00:00";
+                setTimeout("endGame()", 200);
+                clearInterval(refreshIntervalId);
+            }
+        }, 1000);
+
         var originalDOM = new DOMParser().parseFromString(document.documentElement.outerHTML, "text/html");
         var company, companylist, useralias, myName, myEmail, myEmailLocal, head, content, difficulty, real, mCount, dCount, mLimit, dLimit;
         companylist = ["Spotify", "Now Music", "uTorrent", "A Facebook friend", "Messenger", "Facebook", "Clash of Clans", "WhatsApp", "Instagram", "Twitter", "Snapchat", "Candy Crush", "Steam", "Uber", "Uber Eats", "Barclays Bank", "Monzo Bank", "Norton", "Youtube", "Youtube Gaming", "Netflix", "Rabbit", "Amazon", "Play Store", "Tinder"];
         company = companylist[GNB(0, companylist.length-1)];
         var score = 0;
         var emailReal = false;
+        //var alphaSum = 0;
         var gameDifficulty = 10;
         var lastEmailPlayed = 0;
         var emailTemplates = getEmailTemplates(); //so that I can collapse
-        
+        var totalPlayed = 0;
+        var totalCorrect = 0;
         var legitButton = document.getElementById("legit");
         var phishButton = document.getElementById("phish");
-
+        var diffscale = document.getElementById("progress");
        // var elem = document.querySelector('input[type="range"]');
        // var sitechoice = GNB(1,2); // FOR TESTING PURPOSES ONLY
 
@@ -274,39 +383,84 @@
         } */
 
         var legitClick = function() {
-            if (emailReal == true) {
+            totalPlayed += 1;
+            if (emailReal == true) { //email was real and user clicked legit
+                totalCorrect += 1;
+                flash("green");
                 score += 10;
                 changeScore();
+                setTimeout("nextEmail()", 500)
+            } else { //email was fake but user clicked legit
+                score -= 10;
+                changeScore();
+                highlightTypos();
+                flash("red");
+                setTimeout("nextEmail()", 2500)
             }
-            nextEmail();
         }
 
         var phishClick = function() {
+            totalPlayed += 1;
             if (emailReal == false) {
-                console.log("phish correct");
+                totalCorrect += 1;
                 score += 10;
-                changeScore();
+                flash("green");
                 increaseDifficulty();
+                changeScore();
+                //console.log(gameDifficulty);
+                if (gameDifficulty.toString() == "99") {
+                    diffscale.setAttribute("style", "right: 0%;");
+                } else if (gameDifficulty < 99) {
+                    diffscale.setAttribute("style", "right: " + (100-gameDifficulty).toString() + "%");
+                }
+                setTimeout("nextEmail()", 500)
+            } else {
+                score -= 10;
+                changeScore();
+                flash("red");
+                setTimeout("nextEmail()", 2500)
             }
-            console.log("erm");
-            nextEmail();
+            //console.log("erm");
+            //setTimeout(nextEmail(), 1000);
         }
+        
 
         if (legit.addEventListener) {
-            console.log("1");
+            //console.log("1");
             legitButton.addEventListener("click", legitClick)
             phishButton.addEventListener("click", phishClick)
 
         }
         else if (legit.attachEvent) {
-            console.log("2");
+            //console.log("2");
             legitButton.attachEvent("click", legitClick)
             phishButton.attachEvent("click", phishClick)
         }
 
         nextEmail();
 
-    
+
+    function endGame() {
+        resetDOM();
+        var gamepanel = document.getElementById("game_panel");
+        gamepanel.parentNode.removeChild(gamepanel);
+        var dyn = document.getElementById("dyn_content");
+        removeChildElements(dyn);
+        dyn.setAttribute("style", "height: 1000px; margin-top: 100px; text-align: center; font-size: 30px;");
+        addText(dyn, "\n You win! \n Congratulations \n\n You detected " + totalCorrect + " out of " + totalPlayed + " emails! \n\nYour final score: ", "plain", "none", true);
+        addText(dyn, score.toString(), "bold");
+    }
+
+    function flash(colour) {
+        var mainBody = document.getElementsByTagName("body")[0];
+        if (colour == "green") {
+            mainBody.classList.add("flashCorrect");
+        } else if (colour == "red") {
+            mainBody.classList.add("flashIncorrect");
+        }
+            
+    }
+
     function increaseDifficulty() {
         gameDifficulty += 10;
         if (gameDifficulty >= 100) {
@@ -314,30 +468,47 @@
         }
     }
 
+    function highlightTypos(){
+       var typos = document.getElementsByClassName("typo");
+       for (var i = 0; i < typos.length; i++) {
+           typos[i].setAttribute("style", " background: #ffa1a1;");
+       }
+       //setTimeout(function() {}, 3000)
+    }
+    
     function changeScore() {
+        if (score < 0) {
+            score = 0;
+        }
         var scoreText = document.getElementById("scoreText");
         removeChildElements(scoreText);
-        addText(scoreText, score.toString(), "plain",  "none", true);
+        addText(scoreText, "Score: " +  score.toString(), "plain",  "none", true);
+        //console.log("hllo");
     }
 
     function nextEmail(){
-        console.log("Heck " + score);
+        //console.log("Heck " + score);
         resetDOM();
+        var mainBody = document.getElementsByTagName("body")[0];
+        mainBody.classList.remove("flashCorrect");
+        mainBody.classList.remove("flashIncorrect")
+
+
         var emailTemplateNo = lastEmailPlayed;
 
-        console.log("Last email played: " + lastEmailPlayed);
+        //console.log("Last email played: " + lastEmailPlayed);
 
         while (emailTemplateNo == lastEmailPlayed) {
             emailTemplateNo = GNB(0, emailTemplates.length-1);
         }
 
-        console.log("Next email: " + emailTemplateNo);
+        //console.log("Next email: " + emailTemplateNo);
 
 
         lastEmailPlayed = emailTemplateNo;
 
 
-        console.log("Last email played: " + lastEmailPlayed);
+        //console.log("Last email played: " + lastEmailPlayed);
 
         if (GNB(1, 3) == 1) { //decide if legit or phish
             emailReal = true;
@@ -384,9 +555,9 @@
         var e = document.getElementById("email_content");
         var h = document.head;
 
-        removeChildElements(d);
-        removeChildElements(e);
-        removeChildElements(h);
+        if (d) { removeChildElements(d); }
+        if (e) { removeChildElements(e); }
+        if (h) { removeChildElements(h); }
 
         for (var i = 0; i < originalDOM.head.childNodes.length; i++) {
             document.head.appendChild(originalDOM.head.childNodes[i].cloneNode(true));
@@ -408,7 +579,6 @@
             var head = document.head;
             var content = document.getElementById("email_content");
 
-            var paypalHTML = "<html lang=\"en\"> <head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><style type=\"text/css\" nonce=\"\">body,td,div,p,a,input {font-family: arial, sans-serif;}body, td {font-size:13px} a:link, a:active {color:#1155CC; text-decoration:none} a:hover {text-decoration:underline; cursor: pointer} a:visited{color:##6611CC} img{border:0px} pre { white-space: pre; white-space: -moz-pre-wrap; white-space: -o-pre-wrap; white-space: pre-wrap; word-wrap: break-word; max-width: 800px; overflow: auto;} .logo { left: -7px; position: relative; }</style></head><body><div class=\"bodycontainer\"><div style=\"padding:0;margin:0;background:#ffffff\"></div><div style=\"display:none;display:none!important;color:#fff;font-size:1pt\">9 Jul 2019 19:08:00 PDTTransaction ID:592OKSEFOKOL &nbsp;<a href=\"#\" target=\"_blank\" data-saferedirecturl=\"\"></a>..</div><table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\"><tbody><tr><td bgcolor=\"#ffffff\" style=\"font-size:0px\">&nbsp;</td><td bgcolor=\"#ffffff\" width=\"660\" align=\"center\"><table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\"><tbody><tr><td align=\"center\" width=\"600\" valign=\"top\"><table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"><tbody><tr><td bgcolor=\"#ffffff\" style=\"padding-top:10px\"></td></tr><tr><td bgcolor=\"#ffffff\" style=\"padding-top:10px\"></td></tr><tr><td align=\"center\" valign=\"top\" bgcolor=\"#ffffff\"><table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin-bottom:10px\" width=\"100%\"><tbody><tr valign=\"bottom\"><td width=\"20\" align=\"center\" valign=\"top\">&nbsp;</td><td align=\"left\" height=\"64\"><img alt=\"paypal\" style=\"width:113px;height:46px\" width=\"113\" height=\"46\" border=\"0\" src=\"./images/paypal.gif\"></td><td width=\"40\" align=\"center\" valign=\"top\">&nbsp;</td><td align=\"right\"><span><span style=\"display:inline\">9 Jul 2019 19:08:00 PDT</span><span style=\"display:inline\"><span style=\"display:inline\"><br>Transaction ID: <span id =\"transaction_id\"></span></span></span></span></td><td width=\"20\" align=\"center\" valign=\"top\">&nbsp;</td></tr></tbody></table><table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin-bottom:10px\" width=\"100%\"><tbody><tr valign=\"bottom\"><td width=\"20\" align=\"center\" valign=\"top\">&nbsp;</td><td valign=\"top\" style=\"font-family:Calibri,Trebuchet,Arial,sans serif;font-size:15px;line-height:22px;color:#333333\"><div style=\"color:#333!important;font-family:arial,helvetica,sans-serif;font-size:12px\"><span id=\"intro_content\" style=\"color:#333333!important;font-weight:bold;font-family:arial,helvetica,sans-serif\"></span><br><p id=\"title_content\" style=\"font-size:14px;color:#c88039;font-weight:bold;text-decoration:none\"></p><table cellpadding=\"5\"><tbody><tr><td id=\"main_content\" valign=\"top\"></td><td></td></tr></tbody></table><br>It may take a few moments for this transaction to appear in your account.<table align=\"left\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"color:#666666!important;font-family:arial,helvetica,sans-serif;font-size:11px;margin-bottom:20px;clear:both\" width=\"100%\"><tbody><tr><td style=\"padding-top:15px;padding-right:10px\" valign=\"top\" width=\"50%\"><span style=\"color:#333333;font-weight:bold\">Merchant</span><br><span id=\"merchant\" style=\"display:inline\"><br></span><br><span style=\"display:inline\"></span></td><td style=\"padding-top:15px\" valign=\"top\" width=\"50%\"><span style=\"color:#333333;font-weight:bold\">Instructions to merchant</span><br><span style=\"display:inline\">You haven't entered any instructions.</span></td></tr><tr><td><span style=\"display:inline\"></span></td></tr><tr><td style=\"padding-top:15px;padding-right:10px\" valign=\"top\" width=\"50%\"><span style=\"display:inline\"></span></td><td style=\"padding-top:15px\" valign=\"top\" width=\"50%\"><span style=\"display:inline\"></span></td></tr></tbody></table><span style=\"display:inline\"><table align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"clear:both;color:#666666!important;font-family:arial,helvetica,sans-serif;font-size:11px\" width=\"100%\"><tbody><tr><td style=\"border:1px solid #ccc;border-right:none;border-left:none;padding:5px 10px 5px 10px!important;color:#333333!important\" width=\"40%\">Description</td><td align=\"right\" style=\"border:1px solid #ccc;border-right:none;border-left:none;padding:5px 10px 5px 10px!important;color:#333333!important\" width=\"20%\">Unit price</td><td align=\"right\" style=\"border:1px solid #ccc;border-right:none;border-left:none;padding:5px 10px 5px 10px!important;color:#333333!important\" width=\"15%\">Qty</td><td align=\"right\" style=\"border:1px solid #ccc;border-right:none;border-left:none;padding:5px 10px 5px 10px!important;color:#333333!important\" width=\"25%\">Amount</td></tr><tr><td style=\"padding:10px\" width=\"40%\"><br></td><td align=\"right\" style=\"padding:10px\" width=\"20%\"><span id=\"unit_price\" style=\"display:inline\"></span></td><td id=\"quantity\" align=\"right\" style=\"padding:10px\" width=\"15%\"></td><td align=\"right\" style=\"padding:10px\" width=\"25%\"><span id=\"amount\" style=\"display:inline\"></span></td></tr></tbody></table></span><table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-top:1px solid #ccc;border-bottom:1px solid #ccc;clear:both;color:#666666!important;font-family:arial,helvetica,sans-serif;font-size:11px\" width=\"100%\"><tbody><tr><td><span style=\"display:inline\"></span></td></tr><tr><td><table align=\"right\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"color:#666666!important;font-family:arial,helvetica,sans-serif;font-size:11px;margin-top:20px;clear:both;width:100%\"><tbody><tr><td style=\"width:75%;text-align:right;padding:0 10px 0 0\"><strong>Subtotal</strong></td><td style=\"width:25%;text-align:right;padding:0 10px 0 0\"><span id=\"subtotal\" style=\"display:inline\"></span></td></tr><tr><td style=\"width:75%;text-align:right;padding:0 10px 0 0\"><span style=\"display:inline\">Tax</span></td><td id=\"tax\" style=\"width:25%;text-align:right;padding:0 10px 0 0\"></td></tr><tr><td style=\"width:75%;text-align:right;padding:0 10px 0 0\"><span style=\"color:#333333!important;font-weight:bold\">Total</span></td><td style=\"width:25%;text-align:right;padding:0 10px 0 0\"><span id=\"total\" style=\"display:inline\"></span></td></tr><tr><td><span style=\"display:inline\"></span></td></tr><tr><td style=\"width:75%;text-align:right;padding:20px 10px 0 0\"><span style=\"color:#333333!important;font-weight:bold\">Payment</span></td><td id=\"payment\" style=\"width:25%;text-align:right;padding:20px 10px 0 0\"></td></tr><tr><td colspan=\"2\" style=\"width:100%;text-align:right;padding:10px 10px 10px 0\"></td></tr><tr><td colspan=\"2\" style=\"width:100%;text-align:right;padding:10px 10px 10px 0\"></td></tr></tbody></table></td></tr><tr><td style=\"color:#757575;padding-bottom:20px;padding-left:10px\"><br><span id=\"invoice_id\" style=\"padding-left:10px\">Invoice ID:</span></td></tr></tbody></table><br><span style=\"clear:left;font-weight:bold;color:#333333\">Issues with this transaction?</span><br><span style=\"display:inline\">You have 180 days from the date of the transaction to open a dispute in the Resolution Center.</span><span style=\"display:inline\"><br><br><img src=\"./images/quest.gif\" style=\"margin-right:5px;vertical-align:middle\">Questions? Go to the Help Center at <a href=\"http://www.paypal.com/uk/help\" target=\"_blank\" data-saferedirecturl=\"\">www.paypal.com/uk/help</a>.</span><br><br><span style=\"font-size:11px;color:#333\">Please do not reply to this email. This mailbox is not monitored and you will not receive a response. <span style=\"display:inline\">For assistance, log in to your PayPal account and click <strong>Help</strong> in the top right corner of any PayPal page.</span></span><br><span style=\"font-size:11px;color:#333\">You can receive plain text emails instead of HTML emails. To change your Notifications preferences, log in to your account, go to your Profile, and click <strong>My settings</strong>.<br></span></div><table><tbody><tr><td></td></tr></tbody></table><span style=\"font-weight:bold;color:#444\"></span><span></span></td><td width=\"20\" align=\"center\" valign=\"top\">&nbsp;</td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table><table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\"><tbody><tr><td align=\"center\" width=\"600\" valign=\"top\"><table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"><tbody><tr><td align=\"center\" valign=\"top\" bgcolor=\"#ffffff\"><table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tbody><tr valign=\"bottom\"><td width=\"20\" align=\"center\" valign=\"top\">&nbsp;</td><td><span><table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" id=\"m_-2348506855766119411emailFooter\" style=\"padding-top:20px;font:12px Arial,Verdana,Helvetica,sans-serif;color:#292929\" width=\"100%\"><tbody><tr><td><p>Copyright © 1999-2019 PayPal. All rights reserved.</p><p>PayPal (Europe) S.à r.l. et Cie, S.C.A. Société en Commandite par Actions Registered Office: 22-<a href=\"https://www.google.com/maps/search/24+Boulevard+Royal+L-2449,+Luxembourg?entry=gmail&amp;source=g\">24 Boulevard Royal L-2449, Luxembourg</a> RCS Luxembourg B 118 349</p></td></tr></tbody></table><img src=\"./images/quest.gif\" alt=\"\" height=\"1\" width=\"1\" border=\"0\"></span></td><td width=\"20\" align=\"center\" valign=\"top\">&nbsp;</td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table></td><td bgcolor=\"#ffffff\" style=\"font-size:0px\">&nbsp;</td></tr></tbody></table></div></font></div></td></tr></tbody></table></td></tr></tbody></table></div></div></body></html>";
             var paypalDOM = new DOMParser().parseFromString(paypalHTML, "text/html");
 
             var p_intro = paypalDOM.getElementById("intro_content"), p_title = paypalDOM.getElementById("title_content");
@@ -467,7 +637,11 @@
         if (hyperlink) {
             var string = hyperlink.innerHTML;
             removeChildElements(hyperlink);
-            addText(hyperlink, string, "hyperlink", url);
+            if (emailReal) {
+                addText(hyperlink, string, "hyperlink", url, true, false);
+            } else {
+                addText(hyperlink, string, "hyperlink", url, true, true);
+            }
         }
 
         var ph_company = emailDOM.getElementsByClassName("ph_company");
@@ -475,7 +649,7 @@
             var selectCompany = companylist[GNB(0, companylist.length-1)]
             for (var i = 0; i < ph_company.length; i++) {
                 removeChildElements(ph_company[i]);
-                addText(ph_company[i], selectCompany);
+                addText(ph_company[i], selectCompany, "plain", "none");
             }
         }
 
@@ -530,8 +704,9 @@
 
     function generateHeader(senderName, senderAddr){ 
         var details = document.getElementById("details"); //Email header information (From: / To:)
-        addText(details, senderName, "bold", "none", true); 
-        addText(details, " <" + senderAddr + ">\n To: me <" + myEmail + ">", "plain", "none", true);
+        addText(details, senderName + " ", "bold", "none", true); 
+        addText(details, "<" + senderAddr + ">", "plain", "none", true, (!emailReal));
+        addText(details, "\n To: me <" + myEmail + ">", "plain", "none", true);
     }
 
     function imbedElements(main, email) {
@@ -621,81 +796,208 @@
         }
     }
 
-    function addText(node, ostring, type, url, forceLegit){
+    function addText(node, ostring, type, url, forceLegit, forceHighlight){
         var type = type || 'plain';
         var url = (url || 'none');
         var forceLegit = forceLegit || false;
+        var flaggedWords = [];
+        var highlight = false;
+        var forceHighlight = forceHighlight || false;
 
-        if (real || forceLegit) { 
+        if (emailReal || forceLegit) { 
             string = ostring; //if real just use original string
-            console.log("REAL MODE ENABLED");
-        }
-        else {
-            localmlimit = Math.ceil(ostring.length/75); //local miss limit
-            localdlimit = Math.ceil(ostring.length/75); //local double tap limit
+            //console.log("REAL MODE ENABLED");
+        } else {
+            var localmlimit = Math.ceil(ostring.length/75); //local miss limit
+            var localdlimit = Math.ceil(ostring.length/75); //local double tap limit
 
-            localmCount = 0; //amount of misses
-            localdCount = 0; //amount of double taps
+            var localmCount = 0; //amount of misses
+            var localdCount = 0; //amount of double taps
+            var begin = true;
+            var wordStart = -1;
+            var wordEnd = -1;
+            var typo = false;
+            
 
             var string = "";
                 for (var i = 0; i < ostring.length; i++) { //iterate through each character
-
+                    if ((wordStart == -1) && (ostring.charAt(i) !== " ")) {
+                        if (begin) {
+                            wordStart = 0;
+                            begin = false;
+                        } else {
+                            wordStart = string.length;
+                        }
+                        //console.log(wordStart);
+                    }
+                    
                     if (scaledChance(0.05) && mCount < mLimit && localmCount < localmlimit ) { //miss character
                         mCount++;
                         localmCount++;
-                        continue;
+                        typo = true;
                     }
                     else if (ostring.charAt(i) == " ") {
                             if (scaledChance(0.15) && (dCount < dLimit) && (localdCount < localdlimit)) {
                                 string += "  ";
                                 dCount++;
                                 localdCount++;
-                                continue;
+                                //continue;
                             }
                             else {
                                 string += " ";
                             }
+                            
+                            wordEnd = string.length-1;
+                            
+                            if (typo) {
+                                flaggedWords.push(string.substring(wordStart, wordEnd));
+                                console.log("Typo: " + string.substring(wordStart, wordEnd));
+                                string = string.substring(0, wordStart) + "%t" + string.substring(wordEnd);
+                                typo = false;
+                            }
+
+                            wordStart = -1;
+                            wordEnd = -1;
+                            
                     }
                     else if (scaledChance(0.005) && (dCount < dLimit) && (localdCount < localdlimit)) {
                         string += ostring.charAt(i) + ostring.charAt(i);
                         dCount++;
                         localdCount++;
-                        continue;
+                        typo = true;
+                        //continue;
                     }
                     else {
                         string += ostring.charAt(i);
                     }
+                    
+                    if (i >= ostring.length && typo) {
+                        console.log("short one");
+                        flaggedWords.push(string.substring(wordStart, ostring.length-1));
+                        //console.log("Typo: " + string.substring(wordStart, wordEnd));
+                        string = string.substring(0, wordStart) + "%t" + string.substring(wordEnd);
+                        typo = false;
+                    }
+                    
                 }
         }
 
-        text = string.split("\n");
-        for (var i = 0; i < text.length; i++) {
+        //console.log(flaggedWords);
+        nText = string.split("\n");
+        //console.log(nText);
+        highlight = (flaggedWords.length !== 0);
+        console.log(highlight);
+
+        for (var i = 0; i < nText.length; i++) {
             if (i !== 0) {
                node.appendChild(document.createElement("br"));
             }
+            if (highlight) {
+                text = nText[i].split("%t");
+            } else {
+                text = nText[i];
+            }
+
+            if (highlight) {
+            for (var k = 0; k < (text.length-1); k++) {
+                switch(type) {
+                    case "plain": 
+                        node.appendChild(document.createTextNode(text[k]));
+                        var typo = document.createElement("span");
+                        //
+                        typo.setAttribute("class", "typo");
+                        typo.appendChild(document.createTextNode(flaggedWords[k]));
+                        node.appendChild(typo);
+                        break;
+                    case "bold": 
+                        var boldtxt = document.createElement("b");
+                        boldtxt.appendChild(document.createTextNode(text[k]));
+                        node.appendChild(boldtxt);
+                        //
+                        var typo = document.createElement("span");
+                        typo.setAttribute("class", "typo");
+                        typo.appendChild(document.createTextNode(flaggedWords[k]));
+                        var boldtxt2 = document.createElement("b");
+                        boldtxt2.appendChild(typo);
+                        node.appendChild(boldtxt2);
+                        break;
+                    case "hyperlink":
+                        if (url === "none") {
+                            return;
+                        }
+                        var hyperlink = document.createElement("span");
+                        hyperlink.setAttribute("class", "tt-hover");
+                        hyperlink.setAttribute("aria-label", url);
+                        hyperlink.appendChild(document.createTextNode(text[k]));
+                        node.appendChild(hyperlink);
+                        //
+                        var typo = document.createElement("span");
+                        typo.setAttribute("class", "typo");
+                        typo.appendChild(document.createTextNode(flaggedWords[k]));
+                        var hyperlink2 = document.createElement("span");
+                        hyperlink2.setAttribute("class", "tt-hover");
+                        hyperlink2.setAttribute("aria-label", url);
+                        hyperlink2.appendChild(typo);
+                        node.appendChild(hyperlink2);
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+        } else {
             switch(type) {
-                case "plain": 
-                    node.appendChild(document.createTextNode(text[i]));
-                    break;
-                case "bold": 
-                    boldtxt = document.createElement("b");
-                    boldtxt.appendChild(document.createTextNode(text[i]));
-                    node.appendChild(boldtxt);
-                    break;
-                case "hyperlink":
-                    if (url === "none") {
-                        return;
+                    case "plain": 
+                        if (forceHighlight) {
+                            var typo = document.createElement("span");
+                            typo.setAttribute("class", "typo");
+                            typo.appendChild(document.createTextNode(text));
+                            node.appendChild(typo);
+                        } else {
+                            node.appendChild(document.createTextNode(text));
+                        }
+                        break;
+                    case "bold": 
+                    if (forceHighlight) {
+                        var typo = document.createElement("span");
+                        typo.setAttribute("class", "typo");
+                        typo.appendChild(document.createTextNode(text));
+                        var boldtxt2 = document.createElement("b");
+                        boldtxt2.appendChild(typo);
+                        node.appendChild(boldtxt2);
+                    } else {
+                        var boldtxt = document.createElement("b");
+                        boldtxt.appendChild(document.createTextNode(text));
+                        node.appendChild(boldtxt);
                     }
-                    hyperlink = document.createElement("span");
-                    hyperlink.setAttribute("class", "tt-hover");
-                    hyperlink.setAttribute("aria-label", url);
-                    hyperlink.appendChild(document.createTextNode(text[i]));
-                    node.appendChild(hyperlink);
-                    break;
-                default:
-                    break;
-            }   
+                        break;
+                    case "hyperlink":
+                        if (url === "none") {
+                            return;
+                        }
+                        if (forceHighlight) {
+                            //console.log("Here: " + )
+                            var typo = document.createElement("span");
+                            typo.setAttribute("class", "typo");
+                            typo.appendChild(document.createTextNode(text));
+                            var hyperlink2 = document.createElement("span");
+                            hyperlink2.setAttribute("class", "tt-hover");
+                            hyperlink2.setAttribute("aria-label", url);
+                            hyperlink2.appendChild(typo);
+                            node.appendChild(hyperlink2);
+                        } else {
+                            var hyperlink = document.createElement("span");
+                            hyperlink.setAttribute("class", "tt-hover");
+                            hyperlink.setAttribute("aria-label", url);
+                            hyperlink.appendChild(document.createTextNode(text));
+                            node.appendChild(hyperlink);
+                        }
+                        break;
+                    default:
+                        break;
+                }
         }
+      }
     }
 
     function generateAddress(addr, type) { //working, but scaling is a bit off
@@ -703,6 +1005,7 @@
         if (difficulty == 1) {
             return addr;
         }
+
         var fakeAddr = "";
         
         var fakeLocals = ["alerts", "no-reply", "noreply", "security-alert", "security", "messages", "notifications", "notify", "response"];
